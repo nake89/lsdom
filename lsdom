@@ -1,0 +1,48 @@
+#!/bin/bash
+
+listDomains() {
+        user=$1
+        maindomain=$(uapi --user=$user DomainInfo list_domains --output=json 2> /dev/null | jq --raw-output .result.data.main_domain)
+        echo "$user:$maindomain"
+        getdata=$(uapi --user=$user DomainInfo list_domains --output=json 2> /dev/null)
+        lines=$(echo $getdata | jq --raw-output .result.data.addon_domains[] | wc -l)
+        for (( i=0; i<$lines; i++))
+                do
+                        addondomain=$(echo $getdata | jq --raw-output --arg i "$i" '.result.data.addon_domains[$i | tonumber]');
+                        echo "$user:$addondomain"
+                done
+
+}
+first=$1
+second=$2
+if [ -z "$first" ] || [  $first = "--help" ] || [  $first = "-h" ]
+        then
+                echo "Usage: lsdom [OPTION] [INPUT]"
+                echo "Example: lsdom [cPanel username]"
+                echo "Lists domains for certain user by username or domain or for all users"
+                echo ""
+                echo "Options:"
+                echo "  -d [domain]      Displays all domains  of the user of the input domain."
+                echo "  -a, --all        Lists all domains."
+                echo "  -v, --version    Displays version."
+                echo "  -h, --help       This help page."
+                exit
+        elif [ $first = "-v" ] || [  $first = "--version" ]
+                then
+                echo "lsdom 1.0.0"
+                echo "Written by Kevin \"nake89\" Kivi"
+        elif [ $first = "-d" ]
+        then
+                user=$(/scripts/whoowns $second)
+                listDomains $user
+        elif [ $first = "-a" ] || [  $first = "--all" ]
+        then
+                find /var/cpanel/users | cut -d'/' -f5 > cpanelusers2.tmp
+                trap "echo Loop interrupted; exit;" SIGINT SIGTERM
+                while read u; do
+                        listDomains $u
+                done <cpanelusers2.tmp
+                rm -f cpanelusers2.tmp
+        else
+        listDomains $first
+fi
