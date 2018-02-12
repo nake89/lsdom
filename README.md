@@ -25,7 +25,11 @@ yum install jq
 mkdir ~/bin
 cd ~/bin
 echo export PATH=\$PATH:$PWD >> ~/.bashrc
+source ~/.bashrc
+cd ~
 git clone https://github.com/nake89/lsdom
-cd lsdom
+mv lsdom/ .lsdom
+cd .lsdom
 chmod u+x lsdom
+ln -s ~/.lsdom/lsdom ~/bin/lsdom
 ```
