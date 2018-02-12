@@ -32,4 +32,5 @@ mv lsdom/ .lsdom
 cd .lsdom
 chmod u+x lsdom
 ln -s ~/.lsdom/lsdom ~/bin/lsdom
+
 ```
